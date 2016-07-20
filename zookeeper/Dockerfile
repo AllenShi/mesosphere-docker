@@ -5,12 +5,21 @@
 FROM debian:jessie
 MAINTAINER Justin Plock <justin@plock.net>
 
-RUN apt-get update && apt-get install -y openjdk-7-jre-headless wget
-RUN wget -q -O - http://apache.mirrors.pair.com/zookeeper/zookeeper-3.4.6/zookeeper-3.4.6.tar.gz | tar -xzf - -C /opt \
-    && mv /opt/zookeeper-3.4.6 /opt/zookeeper \
-    && cp /opt/zookeeper/conf/zoo_sample.cfg /opt/zookeeper/conf/zoo.cfg \
-    && mkdir -p /tmp/zookeeper
+ARG SITE=http://apache.mirrors.pair.com
+ARG VERSION=3.4.8
+ARG ZK_DATA_DIR=/var/lib/zookeeper
 
+LABEL name="zookeeper" version=$VERSION
+
+RUN sed -i 's/http:\/\/httpredir.debian.org/http:\/\/mirrors.aliyun.com/g' /etc/apt/sources.list 
+RUN sed -i 's/http:\/\/security.debian.org/http:\/\/mirrors.aliyun.com\/debian-security/g' /etc/apt/sources.list 
+RUN apt-get update && apt-get install -y openjdk-7-jre-headless wget
+RUN wget -q -O - $SITE/zookeeper/zookeeper-$VERSION/zookeeper-$VERSION.tar.gz | tar -xzf - -C /opt \
+    && mv /opt/zookeeper-$VERSION /opt/zookeeper \
+    && cp /opt/zookeeper/conf/zoo_sample.cfg /opt/zookeeper/conf/zoo.cfg \
+    && mkdir -p $ZK_DATA_DIR 
+
+ENV ZK_DATA_DIR $ZK_DATA_DIR 
 ENV JAVA_HOME /usr/lib/jvm/java-7-openjdk-amd64
 
 ADD ./run.sh /opt/run.sh
@@ -20,6 +29,6 @@ EXPOSE 2181 2888 3888
 
 WORKDIR /opt/zookeeper
 
-VOLUME ["/opt/zookeeper/conf", "/tmp/zookeeper"]
+VOLUME ["/opt/zookeeper/conf", $ZK_DATA_DIR]
 
 CMD ["/opt/run.sh"]
