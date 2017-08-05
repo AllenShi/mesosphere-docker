@@ -3,16 +3,13 @@
 # SOURCE         https://github.com/jplock/docker-zookeeper
 
 FROM debian:jessie
-MAINTAINER Justin Plock <justin@plock.net>
 
 ARG SITE=http://apache.mirrors.pair.com
-ARG VERSION=3.4.8
+ARG VERSION=3.4.10
 ARG ZK_DATA_DIR=/var/lib/zookeeper
 
 LABEL name="zookeeper" version=$VERSION
 
-RUN sed -i 's/http:\/\/httpredir.debian.org/http:\/\/mirrors.aliyun.com/g' /etc/apt/sources.list 
-RUN sed -i 's/http:\/\/security.debian.org/http:\/\/mirrors.aliyun.com\/debian-security/g' /etc/apt/sources.list 
 RUN apt-get update && apt-get install -y openjdk-7-jre-headless wget
 RUN wget -q -O - $SITE/zookeeper/zookeeper-$VERSION/zookeeper-$VERSION.tar.gz | tar -xzf - -C /opt \
     && mv /opt/zookeeper-$VERSION /opt/zookeeper \
